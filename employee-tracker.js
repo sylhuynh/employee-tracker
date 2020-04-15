@@ -58,9 +58,9 @@ function start() {
       else if (answer.starterQs === "View All Departments") {
         return viewDepartments();
       }
-      // else if (answer.starterQs === "View All Roles") {
-      //   return viewRoles();
-      // }
+      else if (answer.starterQs === "View All Roles") {
+        return viewRoles();
+      }
       else if (answer.starterQs === "Quit") {
         console.log("Goodbye!")
         connection.end();
@@ -199,6 +199,18 @@ function viewDepartments() {
       for (let i = 0; i < res.length; i++) {
         console.log(
           res[i].department
+        );
+      }
+      start();
+    });
+}
+
+function viewRoles() {
+  connection.query("SELECT title FROM roles",
+    (err, res) => {
+      for (let i = 0; i < res.length; i++) {
+        console.log(
+          res[i].title
         );
       }
       start();
