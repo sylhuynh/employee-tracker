@@ -27,7 +27,10 @@ function start() {
         "View All Employees",
         "View All Employees By Department",
         "Add Employee",
+        "Add Department",
+        "Add Role",
         "Update Employee Role",
+        "View All Departments",
         "View All Roles",
         "Quit"
       ],
@@ -41,13 +44,22 @@ function start() {
         return viewByDepartment();
       }
       // else if (answer.starterQs === "Add Employee") {
-      //   return bidAuction();
+      //   return addEmployee();
+      // }
+      // else if (answer.starterQs === "Add Department") {
+      //   return viewByDepartment();
+      // }
+      // else if (answer.starterQs === "Add Role") {
+      //   return viewByDepartment();
       // }
       // else if (answer.starterQs === "Update Employee Role") {
       //   return bidAuction();
       // }
+      else if (answer.starterQs === "View All Departments") {
+        return viewDepartments();
+      }
       // else if (answer.starterQs === "View All Roles") {
-      //   return bidAuction();
+      //   return viewRoles();
       // }
       else if (answer.starterQs === "Quit") {
         console.log("Goodbye!")
@@ -121,5 +133,74 @@ function viewByDepartment() {
           start();
         }
       );
+    });
+}
+
+// function addEmployee() {
+//   inquirer
+//     .prompt(
+//       {
+//         type: "input",
+//         message: "What is the employee's first name?",
+//         name: "newEmpFirst"
+//     },
+//     {
+//         type: "input",
+//         message: "What is your employee's last name?",
+//         name: "newEmpLast"
+//     },
+//     {
+//         type: "list",
+//         message: "What is the employee's role?",
+//         name: "newEmpRole",
+//         choices: ["Lead Engineer", "Junior Engineer", "CEO", "Tech Support"]
+//     },
+//     {
+//       type: "list",
+//       message: "Who is the employee's manager?",
+//       name: "newEmpManager",
+//       choices: ["Jane Doe", "Amy Smith"]
+//     }
+//     )
+//     .then((answer) => {
+//       connection.query(
+//         "INSERT INTO employees SET ?",
+//         { first: answer.newEmpFirst,
+//           last: answer.newEmpLast
+//         },
+//         (err, res) => {
+//           for (let i = 0; i < res.length; i++) {
+//             console.log(
+//               "Id " +
+//               res[i].id +
+//               " || First Name: " +
+//               res[i].first +
+//               " || Last Name: " +
+//               res[i].last +
+//               " || Title: " +
+//               res[i].roles +
+//               " || Department: " +
+//               res[i].department +
+//               " || Salary: " +
+//               res[i].salary +
+//               " || Manager: " +
+//               res[i].manager
+//               );
+//             }
+//           start();
+//         }
+//       );
+//     });
+// }
+
+function viewDepartments() {
+  connection.query("SELECT department FROM departments",
+    (err, res) => {
+      for (let i = 0; i < res.length; i++) {
+        console.log(
+          res[i].department
+        );
+      }
+      start();
     });
 }
