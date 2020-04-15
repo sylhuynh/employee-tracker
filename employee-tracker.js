@@ -10,20 +10,9 @@ const connection = mysql.createConnection({
 })
 
 connection.connect((err) => {
-    if (err) {
-      throw err;
-    }
-    console.log("connected as id " + connection.threadId);
-    afterConnection();
-  });
-  
-  function afterConnection() {
-    connection.query("SELECT * FROM songs", (err, res) => {
-      if (err) {
-        throw err;
-      }
-      console.log(res);
-      connection.end();
-    });
+  if (err) {
+    throw err;
   }
-  
+  console.log("connected as id " + connection.threadId);
+  return start();
+});
