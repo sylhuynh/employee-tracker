@@ -18,9 +18,20 @@ VALUES
     (3, "Tom", "Nook", 4, 1),
 	(4, "John", "Brown", 2, 2);
 
+--Show all employees
 SELECT employees.id, employees.first, employees.last, roles.title AS roles, departments.department AS department, roles.salary AS salary, managers.first AS manager
 FROM employees
 LEFT JOIN employees AS managers ON employees.manager_id = managers.id
 JOIN roles 
 ON employees.role_id = roles.id JOIN departments
 ON roles.dept_id = departments.id ORDER BY employees.id;
+
+--Show all employees based on department
+SELECT employees.id, employees.first, employees.last, roles.title AS roles, departments.department AS department, roles.salary AS salary, managers.first AS manager
+FROM employees
+LEFT JOIN employees AS managers ON employees.manager_id = managers.id
+JOIN roles 
+ON employees.role_id = roles.id JOIN departments
+ON roles.dept_id = departments.id 
+WHERE departments.department = "Development"
+ORDER BY employees.id;

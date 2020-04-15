@@ -37,9 +37,9 @@ function start() {
       if (answer.starterQs === "View All Employees") {
         return viewAllEmployees();
       }
-      // else if (answer.starterQs === "View All Employees By Department") {
-      //   return bidAuction();
-      // }
+      else if (answer.starterQs === "View All Employees By Department") {
+        return viewByDepartment();
+      }
       // else if (answer.starterQs === "Add Employee") {
       //   return bidAuction();
       // }
@@ -64,26 +64,62 @@ function start() {
 }
 
 function viewAllEmployees() {
-  connection.query("SELECT employees.id, employees.first, employees.last, roles.title AS roles, departments.department AS department, roles.salary AS salary, managers.first AS manager FROM employees LEFT JOIN employees AS managers ON employees.manager_id = managers.id JOIN roles ON employees.role_id = roles.id JOIN departments ON roles.dept_id = departments.id ORDER BY employees.id", 
-  (err, res) => {
-    for (let i = 0; i < res.length; i++) {
-      console.log(
-        "Id " +
-        res[i].id +
-        " || First Name: " +
-        res[i].first +
-        " || Last Name: " +
-        res[i].last +
-        " || Title: " +
-        res[i].roles +
-        " || Department: " +
-        res[i].department +
-        " || Salary: " +
-        res[i].salary +
-        " || Manager: " +
-        res[i].manager
+  connection.query("SELECT employees.id, employees.first, employees.last, roles.title AS roles, departments.department AS department, roles.salary AS salary, managers.first AS manager FROM employees LEFT JOIN employees AS managers ON employees.manager_id = managers.id JOIN roles ON employees.role_id = roles.id JOIN departments ON roles.dept_id = departments.id ORDER BY employees.id",
+    (err, res) => {
+      for (let i = 0; i < res.length; i++) {
+        console.log(
+          "Id " +
+          res[i].id +
+          " || First Name: " +
+          res[i].first +
+          " || Last Name: " +
+          res[i].last +
+          " || Title: " +
+          res[i].roles +
+          " || Department: " +
+          res[i].department +
+          " || Salary: " +
+          res[i].salary +
+          " || Manager: " +
+          res[i].manager
+        );
+      }
+      start();
+    });
+}
+
+function viewByDepartment() {
+  inquirer
+    .prompt({
+      name: "department",
+      type: "list",
+      message: "Which department would you like to search for employees?",
+      choices: ["Executive", "Development", "Operations"]
+    }).then((answer) => {
+      connection.query(
+        "SELECT employees.id, employees.first, employees.last, roles.title AS roles, departments.department AS department, roles.salary AS salary, managers.first AS manager FROM employees LEFT JOIN employees AS managers ON employees.manager_id = managers.id JOIN roles ON employees.role_id = roles.id JOIN departments ON roles.dept_id = departments.id WHERE ? ORDER BY employees.id",
+        { department: answer.department },
+        (err, res) => {
+          for (let i = 0; i < res.length; i++) {
+          console.log(
+            "Id " +
+            res[i].id +
+            " || First Name: " +
+            res[i].first +
+            " || Last Name: " +
+            res[i].last +
+            " || Title: " +
+            res[i].roles +
+            " || Department: " +
+            res[i].department +
+            " || Salary: " +
+            res[i].salary +
+            " || Manager: " +
+            res[i].manager
+            );
+          }
+          start();
+        }
       );
-    }
-    start();
-  });
+    });
 }
