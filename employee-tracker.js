@@ -1,5 +1,6 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
+require("console.table");
 
 const connection = mysql.createConnection({
   host: "localhost",
@@ -79,24 +80,7 @@ function start() {
 function viewAllEmployees() {
   connection.query("SELECT employees.id, employees.first, employees.last, roles.title AS roles, departments.department AS department, roles.salary AS salary, managers.first AS manager FROM employees LEFT JOIN employees AS managers ON employees.manager_id = managers.id JOIN roles ON employees.role_id = roles.id JOIN departments ON roles.dept_id = departments.id ORDER BY employees.id",
     (err, res) => {
-      for (let i = 0; i < res.length; i++) {
-        console.log(
-          "Id " +
-          res[i].id +
-          " || First Name: " +
-          res[i].first +
-          " || Last Name: " +
-          res[i].last +
-          " || Title: " +
-          res[i].roles +
-          " || Department: " +
-          res[i].department +
-          " || Salary: " +
-          res[i].salary +
-          " || Manager: " +
-          res[i].manager
-        );
-      }
+      console.table(res);
       start();
     });
 };
@@ -114,24 +98,7 @@ function viewByDepartment() {
         "SELECT employees.id, employees.first, employees.last, roles.title AS roles, departments.department AS department, roles.salary AS salary, managers.first AS manager FROM employees LEFT JOIN employees AS managers ON employees.manager_id = managers.id JOIN roles ON employees.role_id = roles.id JOIN departments ON roles.dept_id = departments.id WHERE ? ORDER BY employees.id",
         { department: answer.department },
         (err, res) => {
-          for (let i = 0; i < res.length; i++) {
-            console.log(
-              "Id " +
-              res[i].id +
-              " || First Name: " +
-              res[i].first +
-              " || Last Name: " +
-              res[i].last +
-              " || Title: " +
-              res[i].roles +
-              " || Department: " +
-              res[i].department +
-              " || Salary: " +
-              res[i].salary +
-              " || Manager: " +
-              res[i].manager
-            );
-          }
+          console.table(res);
           start();
         }
       );
@@ -296,10 +263,10 @@ function updateEmpRole() {
             choices: roleNames
           }]).then((answer) => {
             const chosenEmp = employees.find(
-              (row) => `${row.first} ${row.last}` ===  answer.selectedEmp
+              (row) => `${row.first} ${row.last}` === answer.selectedEmp
             );
             const chosenRole = roles.find(
-              (row) => row.title ===  answer.selectedRole
+              (row) => row.title === answer.selectedRole
             );
             connection.query(
               "UPDATE employees SET ? WHERE ?",
@@ -312,22 +279,18 @@ function updateEmpRole() {
               (err, res) => {
                 if (err) throw err;
               })
-                start();
-              }
-            );
-          });
+            start();
+          }
+          );
     });
+  });
 }
 
 // VIEW ALL DEPARTMENTS
 function viewDepartments() {
   connection.query("SELECT department FROM departments",
     (err, res) => {
-      for (let i = 0; i < res.length; i++) {
-        console.log(
-          res[i].department
-        );
-      }
+      console.table(res);
       start();
     });
 };
@@ -336,11 +299,7 @@ function viewDepartments() {
 function viewRoles() {
   connection.query("SELECT title FROM roles",
     (err, res) => {
-      for (let i = 0; i < res.length; i++) {
-        console.log(
-          res[i].title
-        );
-      }
+      console.table(res);
       start();
     });
 };
