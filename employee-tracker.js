@@ -46,9 +46,9 @@ function start() {
       else if (answer.starterQs === "Add Employee") {
         return addEmployee();
       }
-      // else if (answer.starterQs === "Add Department") {
-      //   return addDepartment();
-      // }
+      else if (answer.starterQs === "Add Department") {
+        return addDepartment();
+      }
       // else if (answer.starterQs === "Add Role") {
       //   return addRole();
       // }
@@ -178,16 +178,12 @@ function addEmployee() {
           }
         ])
         .then((answer) => {
-          //convert string to id(int)
-          // const assignRole = changeRoleString(answer.newEmpRole);
-          // const assignManager = changeMngrString(answer.newEmpManager);
-          // console.log(answer);
           const chosenManager = employees.find(
             (row) => `${row.first} ${row.last}` === answer.newEmpManager
-          );  
+          );
           const chosenRole = roles.find(
             (row) => row.title === answer.newEmpRole
-          );  
+          );
           connection.query(
             "INSERT INTO employees SET ?",
             {
@@ -199,11 +195,30 @@ function addEmployee() {
             (err, res) => {
               if (err) throw err;
             })
-            
+
           start();
         })
     });
   });
+};
+
+//ADD DEPARTMENT
+function addDepartment() {
+  inquirer
+    .prompt({
+      name: "department",
+      type: "input",
+      message: "What department would you like to add?"
+    }).then((answer) => {
+      connection.query(
+        "INSERT INTO departments SET ?",
+        { department: answer.department },
+        (err, res) => {
+          if (err) throw err;
+        })
+        
+      start();
+    });
 };
 
 //UPDATE EMPLOYEE ROLE
