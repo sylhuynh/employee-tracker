@@ -35,3 +35,9 @@ ON employees.role_id = roles.id JOIN departments
 ON roles.dept_id = departments.id 
 WHERE departments.department = "Development"
 ORDER BY employees.id;
+
+--Show all departments
+SELECT department FROM departments;
+
+--Show all roles
+SELECT title from roles;

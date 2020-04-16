@@ -43,17 +43,17 @@ function start() {
       else if (answer.starterQs === "View All Employees By Department") {
         return viewByDepartment();
       }
-      // else if (answer.starterQs === "Add Employee") {
-      //   return addEmployee();
-      // }
+      else if (answer.starterQs === "Add Employee") {
+        return addEmployee();
+      }
       // else if (answer.starterQs === "Add Department") {
-      //   return viewByDepartment();
+      //   return addDepartment();
       // }
       // else if (answer.starterQs === "Add Role") {
-      //   return viewByDepartment();
+      //   return addRole();
       // }
       // else if (answer.starterQs === "Update Employee Role") {
-      //   return bidAuction();
+      //   return updateEmpRole();
       // }
       else if (answer.starterQs === "View All Departments") {
         return viewDepartments();
@@ -73,8 +73,9 @@ function start() {
       console.log(error);
       process.exit(1);
     });
-}
+};
 
+// VIEW ALL EMPLOYEES 
 function viewAllEmployees() {
   connection.query("SELECT employees.id, employees.first, employees.last, roles.title AS roles, departments.department AS department, roles.salary AS salary, managers.first AS manager FROM employees LEFT JOIN employees AS managers ON employees.manager_id = managers.id JOIN roles ON employees.role_id = roles.id JOIN departments ON roles.dept_id = departments.id ORDER BY employees.id",
     (err, res) => {
@@ -98,8 +99,9 @@ function viewAllEmployees() {
       }
       start();
     });
-}
+};
 
+// VIEW BY DEPARTMENT
 function viewByDepartment() {
   inquirer
     .prompt({
@@ -113,86 +115,128 @@ function viewByDepartment() {
         { department: answer.department },
         (err, res) => {
           for (let i = 0; i < res.length; i++) {
-          console.log(
-            "Id " +
-            res[i].id +
-            " || First Name: " +
-            res[i].first +
-            " || Last Name: " +
-            res[i].last +
-            " || Title: " +
-            res[i].roles +
-            " || Department: " +
-            res[i].department +
-            " || Salary: " +
-            res[i].salary +
-            " || Manager: " +
-            res[i].manager
+            console.log(
+              "Id " +
+              res[i].id +
+              " || First Name: " +
+              res[i].first +
+              " || Last Name: " +
+              res[i].last +
+              " || Title: " +
+              res[i].roles +
+              " || Department: " +
+              res[i].department +
+              " || Salary: " +
+              res[i].salary +
+              " || Manager: " +
+              res[i].manager
             );
           }
           start();
         }
       );
     });
-}
+};
 
-// function addEmployee() {
+// ADD EMPLOYEE
+function addEmployee() {
+  connection.query("SELECT id, title FROM roles", (err, roles) => {
+    if (err) {
+      throw err;
+    }
+    const roleNames = roles.map((row) => row.title);
+
+    connection.query("SELECT id, first, last FROM employees", (err, employees) => {
+      if (err) {
+        throw err;
+      }
+      const empNames = employees.map((row) => `${row.first} ${row.last}`);
+
+      return inquirer
+        .prompt([
+          {
+            type: "input",
+            message: "What is the employee's first name?",
+            name: "newEmpFirst"
+          },
+          {
+            type: "input",
+            message: "What is your employee's last name?",
+            name: "newEmpLast"
+          },
+          {
+            type: "list",
+            message: "What is the employee's role?",
+            name: "newEmpRole",
+            choices: roleNames
+          },
+          {
+            type: "list",
+            message: "Who is the employee's manager?",
+            name: "newEmpManager",
+            choices: empNames
+          }
+        ])
+        .then((answer) => {
+          //convert string to id(int)
+          // const assignRole = changeRoleString(answer.newEmpRole);
+          // const assignManager = changeMngrString(answer.newEmpManager);
+          // console.log(answer);
+          const chosenManager = employees.find(
+            (row) => `${row.first} ${row.last}` === answer.newEmpManager
+          );  
+          const chosenRole = roles.find(
+            (row) => row.title === answer.newEmpRole
+          );  
+          connection.query(
+            "INSERT INTO employees SET ?",
+            {
+              first: answer.newEmpFirst,
+              last: answer.newEmpLast,
+              role_id: chosenRole.id,
+              manager_id: chosenManager.id
+            },
+            (err, res) => {
+              if (err) throw err;
+            })
+            
+          start();
+        })
+    });
+  });
+};
+
+//UPDATE EMPLOYEE ROLE
+// function updateEmpRole() {
 //   inquirer
 //     .prompt(
 //       {
-//         type: "input",
-//         message: "What is the employee's first name?",
-//         name: "newEmpFirst"
-//     },
-//     {
-//         type: "input",
-//         message: "What is your employee's last name?",
-//         name: "newEmpLast"
-//     },
-//     {
+//         name: "selectedEmp",
 //         type: "list",
-//         message: "What is the employee's role?",
-//         name: "newEmpRole",
-//         choices: ["Lead Engineer", "Junior Engineer", "CEO", "Tech Support"]
-//     },
-//     {
-//       type: "list",
-//       message: "Who is the employee's manager?",
-//       name: "newEmpManager",
-//       choices: ["Jane Doe", "Amy Smith"]
-//     }
-//     )
-//     .then((answer) => {
-//       connection.query(
-//         "INSERT INTO employees SET ?",
-//         { first: answer.newEmpFirst,
-//           last: answer.newEmpLast
-//         },
-//         (err, res) => {
-//           for (let i = 0; i < res.length; i++) {
-//             console.log(
-//               "Id " +
-//               res[i].id +
-//               " || First Name: " +
-//               res[i].first +
-//               " || Last Name: " +
-//               res[i].last +
-//               " || Title: " +
-//               res[i].roles +
-//               " || Department: " +
-//               res[i].department +
-//               " || Salary: " +
-//               res[i].salary +
-//               " || Manager: " +
-//               res[i].manager
-//               );
+//         message: "Which employee do you want to update?",
+//         choices: [""]
+//       },
+//       {
+//         name: "updatedRole",
+//         type: "list",
+//         message: "Which role do you want to set for the selected employee?",
+//         choices: [""]
+//       }).then((answer) => {
+//         connection.query(
+//           "SELECT employees.id, employees.first, employees.last, roles.title AS roles, departments.department AS department, roles.salary AS salary, managers.first AS manager FROM employees LEFT JOIN employees AS managers ON employees.manager_id = managers.id JOIN roles ON employees.role_id = roles.id JOIN departments ON roles.dept_id = departments.id WHERE ? ORDER BY employees.id",
+//           { department: answer.department },
+//           (err, res) => {
+//             for (let i = 0; i < res.length; i++) {
+//               console.log("Updated employee's role");
 //             }
-//           start();
-//         }
-//       );
-//     });
+//             start();
+//           }
+//         );
+//       });
 // }
 
+
+// VIEW ALL DEPARTMENTS
 function viewDepartments() {
   connection.query("SELECT department FROM departments",
     (err, res) => {
@@ -203,8 +247,9 @@ function viewDepartments() {
       }
       start();
     });
-}
+};
 
+//VIEW ALL ROLES
 function viewRoles() {
   connection.query("SELECT title FROM roles",
     (err, res) => {
@@ -215,4 +260,4 @@ function viewRoles() {
       }
       start();
     });
-}
+};
