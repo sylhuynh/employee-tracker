@@ -49,9 +49,9 @@ function start() {
       else if (answer.starterQs === "Add Department") {
         return addDepartment();
       }
-      // else if (answer.starterQs === "Add Role") {
-      //   return addRole();
-      // }
+      else if (answer.starterQs === "Add Role") {
+        return addRole();
+      }
       // else if (answer.starterQs === "Update Employee Role") {
       //   return updateEmpRole();
       // }
@@ -216,8 +216,54 @@ function addDepartment() {
         (err, res) => {
           if (err) throw err;
         })
-        
+
       start();
+    });
+};
+
+//ADD ROLE
+function addRole() {
+  connection.query("SELECT id, department FROM departments", (err, departments) => {
+    if (err) {
+      throw err;
+    }
+    const departmentNames = departments.map((row) => row.department);
+      return inquirer
+        .prompt([
+          {
+            type: "input",
+            message: "What is the title of the role?",
+            name: "newRoleTitle"
+          },
+          {
+            type: "input",
+            message: "What is the expected salary for such role?",
+            name: "newRoleSalary"
+          },
+          {
+            type: "list",
+            message: "What department is this role assigned to?",
+            name: "newRoleDep",
+            choices: departmentNames
+          },
+        ])
+        .then((answer) => {
+          const chosenRole = departments.find(
+            (row) => row.department === answer.newRoleDep
+          );
+          connection.query(
+            "INSERT INTO roles SET ?",
+            {
+              title: answer.newRoleTitle,
+              salary: answer.newRoleSalary,
+              dept_id: chosenRole.id
+            },
+            (err, res) => {
+              if (err) throw err;
+            })
+
+          start();
+        })
     });
 };
 
