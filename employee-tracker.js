@@ -52,9 +52,9 @@ function start() {
       else if (answer.starterQs === "Add Role") {
         return addRole();
       }
-      // else if (answer.starterQs === "Update Employee Role") {
-      //   return updateEmpRole();
-      // }
+      else if (answer.starterQs === "Update Employee Role") {
+        return updateEmpRole();
+      }
       else if (answer.starterQs === "View All Departments") {
         return viewDepartments();
       }
@@ -228,74 +228,96 @@ function addRole() {
       throw err;
     }
     const departmentNames = departments.map((row) => row.department);
-      return inquirer
-        .prompt([
+    return inquirer
+      .prompt([
+        {
+          type: "input",
+          message: "What is the title of the role?",
+          name: "newRoleTitle"
+        },
+        {
+          type: "input",
+          message: "What is the expected salary for such role?",
+          name: "newRoleSalary"
+        },
+        {
+          type: "list",
+          message: "What department is this role assigned to?",
+          name: "newRoleDep",
+          choices: departmentNames
+        },
+      ])
+      .then((answer) => {
+        const chosenRole = departments.find(
+          (row) => row.department === answer.newRoleDep
+        );
+        connection.query(
+          "INSERT INTO roles SET ?",
           {
-            type: "input",
-            message: "What is the title of the role?",
-            name: "newRoleTitle"
+            title: answer.newRoleTitle,
+            salary: answer.newRoleSalary,
+            dept_id: chosenRole.id
           },
-          {
-            type: "input",
-            message: "What is the expected salary for such role?",
-            name: "newRoleSalary"
-          },
-          {
-            type: "list",
-            message: "What department is this role assigned to?",
-            name: "newRoleDep",
-            choices: departmentNames
-          },
-        ])
-        .then((answer) => {
-          const chosenRole = departments.find(
-            (row) => row.department === answer.newRoleDep
-          );
-          connection.query(
-            "INSERT INTO roles SET ?",
-            {
-              title: answer.newRoleTitle,
-              salary: answer.newRoleSalary,
-              dept_id: chosenRole.id
-            },
-            (err, res) => {
-              if (err) throw err;
-            })
+          (err, res) => {
+            if (err) throw err;
+          })
 
-          start();
-        })
-    });
+        start();
+      })
+  });
 };
 
 //UPDATE EMPLOYEE ROLE
-// function updateEmpRole() {
-//   inquirer
-//     .prompt(
-//       {
-//         name: "selectedEmp",
-//         type: "list",
-//         message: "Which employee do you want to update?",
-//         choices: [""]
-//       },
-//       {
-//         name: "updatedRole",
-//         type: "list",
-//         message: "Which role do you want to set for the selected employee?",
-//         choices: [""]
-//       }).then((answer) => {
-//         connection.query(
-//           "SELECT employees.id, employees.first, employees.last, roles.title AS roles, departments.department AS department, roles.salary AS salary, managers.first AS manager FROM employees LEFT JOIN employees AS managers ON employees.manager_id = managers.id JOIN roles ON employees.role_id = roles.id JOIN departments ON roles.dept_id = departments.id WHERE ? ORDER BY employees.id",
-//           { department: answer.department },
-//           (err, res) => {
-//             for (let i = 0; i < res.length; i++) {
-//               console.log("Updated employee's role");
-//             }
-//             start();
-//           }
-//         );
-//       });
-// }
+function updateEmpRole() {
+  connection.query("SELECT id, title FROM roles", (err, roles) => {
+    if (err) {
+      throw err;
+    }
+    const roleNames = roles.map((row) => row.title);
 
+    connection.query("SELECT id, first, last FROM employees", (err, employees) => {
+      if (err) {
+        throw err;
+      }
+      const empNames = employees.map((row) => `${row.first} ${row.last}`);
+
+      return inquirer
+        .prompt(
+          [{
+            name: "selectedEmp",
+            type: "list",
+            message: "Which employee do you want to update?",
+            choices: empNames
+          },
+          {
+            name: "selectedRole",
+            type: "list",
+            message: "Which role do you want to set for the selected employee?",
+            choices: roleNames
+          }]).then((answer) => {
+            const chosenEmp = employees.find(
+              (row) => `${row.first} ${row.last}` ===  answer.selectedEmp
+            );
+            const chosenRole = roles.find(
+              (row) => row.title ===  answer.selectedRole
+            );
+            connection.query(
+              "UPDATE employees SET ? WHERE ?",
+              [{
+                role_id: chosenRole.id
+              },
+              {
+                id: chosenEmp.id
+              }],
+              (err, res) => {
+                if (err) throw err;
+              })
+                start();
+              }
+            );
+          });
+    });
+}
 
 // VIEW ALL DEPARTMENTS
 function viewDepartments() {
